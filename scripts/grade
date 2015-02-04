@@ -16,15 +16,16 @@ fi
 assignment=$1
 one_username=$2
 
+#if username is one character, interpret as lab section letter
 if [ ${#one_username} == 1 ]
   then
     labs=($one_username)
-    one_username=all
+    one_username=all      #process all students in this lab
   else
-    labs=(A B C D E F G H)
+    labs=(A B C D E F G H)  #search all labs for one or all
 fi
 
-csvs="/u/c211/spring15/grades/csvs"
+csvs="/u/c211/spring15/grades/csvs/$assignment"
 usernames="/u/c211/spring15/handin-server/$assignment"
 
 #check existence of assignment folder
@@ -46,7 +47,7 @@ fi
 foundhim=false
 
 for section in "${labs[@]}"; do
-  csv=$csvs/$section-$assignment.csv
+  csv=$csvs/$section.csv
 
   echo "Processing $section lab..."
 
@@ -63,14 +64,18 @@ for section in "${labs[@]}"; do
       
       ##print out what we now know
       #echo "$username in $section got a $grade on $assignment."
-
+      #continue
+      
       #only process if found a match or processing ALL students
       if [ $one_username == all ] || [ $one_username == $username ]; then
+
+	# Skip students with Z grade, and report it!
         if [ $grade == Z ]; then
           echo "Z grade in $csv"
 	  continue
 	fi
-        #Check for user submission
+
+        # Skip students w/o submission, and report it!
         if [ ! -d "$usernames/$username" ]; then
           echo "$username of $section lab didn\'t submit but has a grade assigned"
 	  continue
@@ -85,12 +90,14 @@ for section in "${labs[@]}"; do
 	  #could return an exit code because in subshell
 	fi
       fi
-    done
-    if [ $? == 211 ]; then
-      foundhim=true
-      break
-    fi
-done
+    done #while
+
+  if [ $? == 211 ]; then
+    foundhim=true
+    break
+  fi
+
+done #for
 
 if [ $one_username != all ] && [ $foundhim == false ]; then
   echo $one_username NOT updated!
