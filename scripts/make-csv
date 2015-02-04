@@ -2,6 +2,10 @@
 
 # Creates .csv files (for grading) from .roster files (from pairup)
 
+echo "This has a BUG!"
+#adds an extra comma for xmo in A.csv
+exit
+
 if [ $# -ne 2 ]; then
   echo ""
   echo "Distributes grades from CSVs to handin-server files for web access"
@@ -29,7 +33,6 @@ then
     labs=("${lab_names_all[@]}")
 else
     for lab_name in "${lab_names_all[@]}"; do
-	echo $lab_name
 	if [ "$section" == "${lab_name:0:1}" ];then
 	    labs=($lab_name)
 	    break
@@ -69,9 +72,28 @@ for lab_name in "${labs[@]}"; do
     fi
 
     section="${lab_name:0:1}"
-    csv="$csvs/$section.csv"
+#    csv="$csvs/$section.csv"
+    csv="/u/c211/spring15/paul-test/$section.csv"
 
-    ##Here's what we got
-    echo "Time to create $csv from $roster"
+    if [ -f "$csv" ]
+    then
+	echo "$csv already exists!  Will not overwrite!"
+	echo "If this is your intention, delete it manually."
+    else
+	
+	##Here's what we got
+	#echo "Time to create $csv from $roster"
 
+	echo "writing $section.csv"
+
+	# see distribute, code duplication
+	while read username_realname; do
+	    username="${username_realname%% *}"
+	    
+	    ##print out what we now know
+	    #echo "$username in $section defaulting to Z on $assignment."
+	    
+	    echo "$username, Z" >> "$csv"
+	done < <(cat $roster)
+    fi
 done

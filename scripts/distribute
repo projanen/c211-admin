@@ -114,6 +114,7 @@ for path_filename in $rosters/*.roster; do
 
   begin_process_section $section
 
+  # see make-csv, code duplication
   while read username_realname; do
     username="${username_realname%% *}"
     realname="${username_realname#* }"
