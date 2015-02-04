@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# Collects an appealed (resbumitted) homework from handin-server
+
+if [ $# -ne 2 ]; then
+  echo
+  echo "Collects an appealed (resubmitted) homework from the handin-server."
+  echo "Usage: appeal assignment username"
+  echo "Example: appeal a1 projanen"
+  echo
+  echo "Look in ~/spring15/appeals for their submission."
+  exit
+fi
+
+assignment=$1
+username=$2
+
+folder="/u/c211/spring15/handin-server/$assignment"
+destination="/u/c211/spring15/appeals/$assignment"
+
+#check existence of source folder, also confirms assignment format
+if [ ! -d "$folder" ]; then
+  echo "Cannot find submission folder!  Nothing done.  Bad assignment name?"
+  exit
+fi
+
+#check existence of submitted assignment
+if [ ! -f "$folder/$username/$assignment.rkt" ]; then
+  echo "Cannot find $username's submission!"
+  exit
+fi
+
+#check existence of destination subfolder, if necessary
+if [ ! -d "$destination" ]; then
+  mkdir $destination
+fi
+
+cp --preserve=timestamps $folder/$username/grading/text.rkt $destination/$username.rkt

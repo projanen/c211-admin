@@ -1,0 +1,182 @@
+#!/bin/bash
+
+# Creates and distributes .pdf from username folders to lab section folders
+# Also copies .rkt files into same location
+
+if [ $# -ne 1 ]; then
+  echo ""
+  echo "Creates and distributes assignment PDFs from username folders to lab section folders"
+  echo "Usage: distribute assignment"
+  echo "Example: distribute a1"
+  exit
+fi
+
+assignment=$1
+
+rosters="/u/c211/spring15/pairup"
+usernames="/u/c211/spring15/collected-submissions/$assignment"
+assignments="/u/c211/spring15/processed-submissions"
+sections="$assignments/$assignment"
+account_file="/u/c211/spring15/handin-server/users.rktd"
+
+faculty=(menzel schackb jaiguerr metcalka cfactora kmbitner projanen mdhook eeleonha jenlipso cylimill crschmit dtzvetko daaasbu ysieweni mthyde)
+
+unknown_section="Unknown"
+
+#check existence of source folder, also confirms assignment format
+if [ ! -d "$usernames" ]; then
+  echo "$usernames does not exist!  Nothing done"
+  exit
+fi
+
+#make assignment folder if needed
+if [ ! -d "$assignments/$assignment" ]; then
+  mkdir $assignments/$assignment
+fi
+
+#empty arrays declared globally for use outside the below loops
+count=0
+rostered=
+
+header=
+
+# Helper function for setting .pdf header
+# Usage: make_header $section_full $realname $username
+make_header () {
+
+  local section_full
+  local realname
+  local username
+
+  section_full=$1
+  realname=$2
+  username=$3
+
+  header="$section_full   $assignment                $realname ($username)"
+}
+
+# Helper function for searching within arrays
+# returns 0 for yes, 1 for no
+# Usage: elementIn element "${array[@]}"
+elementIn () {
+  local e
+  for e in "${@:2}"; do [[ "$e" == "$1" ]] && return 0; done
+  return 1
+}
+
+# Helper function for setting up each lab section for receiving .rkt and .pdf
+# Usage: begin_process_section $section
+begin_process_section () {
+  local section
+  section=$1
+
+  echo
+  echo "Processing $section lab..."
+
+  #make section folder if needed
+  if [ ! -d "$sections/$section" ]; then
+    mkdir $sections/$section
+  fi
+}
+
+# Helper function for copying .rkt
+# Usage: copy_rkt $username $section
+copy_rkt () {
+  local username
+  local section
+
+  username=$1
+  section=$2
+
+  cp --preserve=timestamps $usernames/$username/grading/text.rkt $sections/$section/$username.rkt
+}
+
+# Helper function for making .pdf
+# Usage: make_pdf $username $section
+make_pdf () {
+  local username
+  local section
+
+  username=$1
+  section=$2
+
+  #create PDF from .rkt
+  cat $sections/$section/$username.rkt |
+  enscript --quiet --columns=2 --fancy-header --no-job-header --landscape --header="$header" --output=- | psduplex -tumble |
+  ps2pdf - > $sections/$section/$username.pdf
+}
+
+#process all usernames found in the lab rosters
+for path_filename in $rosters/*.roster; do
+  roster=${path_filename##*/}
+  section_full=${roster%.roster}
+  section=${roster:0:1}
+
+  begin_process_section $section
+
+  while read username_realname; do
+    username="${username_realname%% *}"
+    realname="${username_realname#* }"
+    realname="${realname%\"}"
+    realname="${realname#\"}"
+    
+    ##print out what we now know
+    #echo "$username goes by $realname and is in $section section"
+    
+    rostered[((count++))]=$username
+    
+    make_header $section_full "$realname" $username
+    
+    #Check for user submission
+    if [ ! -d "$usernames/$username" ]
+    then
+      #create "blank" .rkt
+      echo "$realname ($username) did not submit on time"
+      echo "                                Could not find submission" |
+        cat - > $sections/$section/$username.rkt
+    else
+      copy_rkt $username $section
+    fi
+    make_pdf $username $section
+  done < <(cat $path_filename)
+done
+
+#process all usernames with handin accounts but are not in a lab roster
+begin_process_section $unknown_section
+echo
+while read user_account; do
+  noparen="${user_account:1}"
+  handin_user="${noparen%% (*}"
+
+  rest="${noparen#* (}"
+  rest="${rest#* \"}"
+  handin_real="${rest%%\" *}"
+
+  rest="${rest#* \"}"
+  rest="${rest#* \"}"
+  handin_lab="${rest%%\")*}"
+
+  elementIn $handin_user "${rostered[@]}"
+  if [ $? == 1 ]; then
+    elementIn $handin_user "${faculty[@]}"
+    if [ $? == 1 ]; then
+
+      echo "$handin_lab"
+      echo "$handin_real ($handin_user) is not in a lab roster!"
+      echo "  -- $handin_user claims to be in $handin_lab section."
+
+      if [ ! -d "$usernames/$handin_user" ]
+      then
+	echo "  !! $handin_user did not submit.  Still in course?"
+	echo
+      else
+	make_header $unknown_section "$handin_real" $handin_user
+	copy_rkt $handin_user $unknown_section
+	make_pdf $handin_user $unknown_section
+	echo "  ** $handin_user did submit.  Look in Unknown folder."
+	echo
+      fi
+    fi
+  fi
+done < <(cat $account_file | grep "\s(")
+

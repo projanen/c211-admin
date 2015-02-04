@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Prints all assignments for the given assignment and lab section to the designated LH room
+
+if [ $# -ne 3 ]; then
+  echo "Prints all assignments for the given assignment and lab section to the designated LH room"
+  echo "Usage: print-elsewhere assignment lab_section printer_room_number"
+  echo "Example: print-elsewhere a1 
+  exit
+fi
+
+assignment=$1
+section=$2
+room=$3
+
+print-elsewhere2 $assignment $section $room-1

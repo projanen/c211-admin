@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# Prints all assignments for the given assignment and lab section to the designated LH room
+
+if [ $# -ne 3 ]; then
+  echo "Prints all assignments for the given assignment and lab section to the designated LH room"
+  echo "Usage: print-elsewhere2 assignment lab_section printer_room_ number_AND_printer_number"
+  echo "Usage: print-elsewhere2 a2 B 330-1"
+  exit
+fi
+
+assignment=$1
+section=$2
+room=$3
+
+folder="/u/c211/spring15/processed-submissions/$assignment/$section"
+
+#check existence of source folder, also confirms assignment format
+if [ ! -d "$folder" ]; then
+  echo "$folder does not exist!  Nothing done.  Bad assignment or lab section name?"
+  exit
+fi
+
+lpr -o sides=two-sided-long-edge -h -Pbl-soic-l$room $folder/*.pdf

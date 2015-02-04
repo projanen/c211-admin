@@ -1,0 +1,97 @@
+#!/bin/bash
+
+# Distributes grades from CSVs to handin-server files for web access
+
+if [ $# -ne 2 ]; then
+  echo ""
+  echo "Distributes grades from CSVs to handin-server files for web access"
+  echo
+  echo "Usage: grade assignment {'all' OR lab_section_letter OR username}"
+  echo "Example: grade a1 all      <-- transcribes all a1 grades"
+  echo "Example: grade a1 D        <-- transcribes only from .../a1/D.csv"
+  echo "Example: grade a1 projanen <-- transcribes only projanen's grade"
+  exit
+fi
+
+assignment=$1
+one_username=$2
+
+if [ ${#one_username} == 1 ]
+  then
+    labs=($one_username)
+    one_username=all
+  else
+    labs=(A B C D E F G H)
+fi
+
+csvs="/u/c211/spring15/grades/csvs"
+usernames="/u/c211/spring15/handin-server/$assignment"
+
+#check existence of assignment folder
+if [ ! -d $usernames ]; then
+  echo "$usernames does not exist!  Nothing done"
+  exit
+fi
+
+#check existence of source folder, also confirms assignment format
+if [ ! -d "$csvs" ]; then
+  echo "CSV folder ($csvs) does not exist!  Nothing done"
+  exit
+fi
+
+if [ $one_username != all ]; then
+  echo "Searching for $one_username..."
+fi
+
+foundhim=false
+
+for section in "${labs[@]}"; do
+  csv=$csvs/$section-$assignment.csv
+
+  echo "Processing $section lab..."
+
+  #check that CSV file exists
+  if [ ! -f $csv ]; then
+    echo "$csv does not exist!  Skipping $section lab.  Continuing..."
+    continue
+  fi
+
+  cat $csv |
+    while read username_grade; do
+      username="${username_grade%%,*}"
+      grade="${username_grade##*, }"
+      
+      ##print out what we now know
+      #echo "$username in $section got a $grade on $assignment."
+
+      #only process if found a match or processing ALL students
+      if [ $one_username == all ] || [ $one_username == $username ]; then
+        if [ $grade == Z ]; then
+          echo "Z grade in $csv"
+	  continue
+	fi
+        #Check for user submission
+        if [ ! -d "$usernames/$username" ]; then
+          echo "$username of $section lab didn\'t submit but has a grade assigned"
+	  continue
+	fi
+
+	echo $grade > $usernames/$username/grade
+
+	if [ $one_username == $username ]; then
+          echo $username updated
+	  exit 211
+	  #could not set foundhim because in subshell
+	  #could return an exit code because in subshell
+	fi
+      fi
+    done
+    if [ $? == 211 ]; then
+      foundhim=true
+      break
+    fi
+done
+
+if [ $one_username != all ] && [ $foundhim == false ]; then
+  echo $one_username NOT updated!
+fi

@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# A wrapper for collecting, distributing, and PDFing homework assignments submitted via Dr Racket's handing-server
+
+if [ $# -ne 1 ]; then
+  echo ""
+  echo "A wrapper for collecting, distributing, and PDFing homework assignments submitted via Dr Racket's handing-server"
+  echo
+  echo "Usage: collect-and-distribute assignment"
+  echo "Example: collect-and-distribute a1"
+  exit
+fi
+
+assignment=$1
+
+collect $assignment
+
+# If collect failed, do not attempt the distribute
+if [ $? -ne 0 ]; then
+  echo
+  echo "collect failed, will not attempt to distribute"
+  echo
+  exit $?
+fi
+
+distribute $assignment
