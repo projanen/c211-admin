@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Creates .csv files (for grading) from .roster files (from pairup)
+
+if [ $# -ne 2 ]; then
+  echo ""
+  echo "Distributes grades from CSVs to handin-server files for web access"
+  echo
+  echo "Usage: make-csv assignment {'all' OR lab_section_letter}"
+  echo
+  echo "Example: make-csv a1 all   <-- creates for all sections"
+  echo "Example: make-csv lab3 D   <-- creates for one section"
+  echo
+  exit
+fi
