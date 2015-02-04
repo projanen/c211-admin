@@ -13,3 +13,65 @@ if [ $# -ne 2 ]; then
   echo
   exit
 fi
+
+# section implies single-letter lab designation
+# lab or lab_name means long version of lab name
+
+assignment=$1
+section=$2
+
+lab_names_all=(ATT Beta CoolLab Dragon Emerald FunkyBunch Grapes HappyHour)
+
+labs=()
+
+if [ $section == all ]
+then
+    labs=("${lab_names_all[@]}")
+else
+    for lab_name in "${lab_names_all[@]}"; do
+	echo $lab_name
+	if [ "$section" == "${lab_name:0:1}" ];then
+	    labs=($lab_name)
+	    break
+	fi
+    done
+    if [ -z "${labs[@]}" ]; then
+	echo "Unrecognized lab section name!"
+	echo "Expected A, B, C, ..."
+	exit
+    fi
+fi
+
+rosters="/u/c211/spring15/pairup"
+csvs="/u/c211/spring15/grades/csvs/$assignment"
+
+# Check for roster directory
+if [ ! -d "$rosters" ]; then
+    echo "$rosters does not exist!  Nothing done."
+    exit
+fi
+
+# Check for csv directory
+if [ ! -d "$csvs" ]; then
+    echo "$csvs does not exist!  Nothing done."
+    exit
+fi
+
+# Process the lab(s)
+for lab_name in "${labs[@]}"; do
+
+    roster="$rosters/$lab_name.roster"
+
+    # Check for roster file for this lab section
+    if [ ! -f "$roster" ]; then
+	echo "$roster does not exist!  Skipping $lab.  Continuing..."
+	continue
+    fi
+
+    section="${lab_name:0:1}"
+    csv="$csvs/$section.csv"
+
+    ##Here's what we got
+    echo "Time to create $csv from $roster"
+
+done
