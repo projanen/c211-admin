@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# Collects homework from handin-server
+
+if [ $# -ne 1 ]; then
+  echo "Collects homework from handin-server."
+  echo "Usage: collect [assignment]"
+  exit 0
+fi
+
+assignment=$1
+
+folder="/u/c211/spring15/handin-server/$assignment"
+destination="/u/c211/spring15/collected-submissions-backup"
+
+#check existence of source folder, also confirms assignment format
+if [ ! -d "$folder" ]; then
+  echo "$folder does not exist!  Nothing done.  Bad assignment?"
+  exit 1
+fi
+
+#check if this has already been done.  Exit if so.  Does not risk overwriting.
+#manually delete the collection first, or update this to behave differently, carefully.
+if [ -d "$destination/$assignment" ]; then
+  echo "$destination/$assignment already exists!  I'm not going to overwrite it nor its contents.  Please double-check things."
+  exit 1
+fi
+
+cd /u/c211/spring15/handin-server
+cp --no-clobber --preserve=timestamps --parents $assignment/*/$assignment.rkt $destination/.
+cp --no-clobber --preserve=timestamps --parents $assignment/*/grading/text.rkt $destination/.
+
+echo "Success!"
