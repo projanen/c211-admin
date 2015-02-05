@@ -1,0 +1,70 @@
+#!/bin/bash
+
+# Prints assignments in Lindley Hall
+
+if [ $# -ne 2 ] && [ $# -ne 3 ]; then
+    echo
+    echo "Prints assignments in Lindley Hall"
+    echo "Usage: print-elsewhere2 assignment lab_section printer_room_ number_AND_printer_number"
+    echo
+    echo "print a2 B        ; prints all of B lab to 201-1"
+    echo "print a2 B 330    ; prints  \"  \"  \"  \"  to 330-1"
+    echo "print a2 B 330-2  ; prints  \"  \"  \"  \"  to 330-2"
+    echo
+    echo "print a2 projanen       ; prints one .pdf to 201-1"
+    echo "print a2 projanen 330   ;   \"     \"    \"  to 330-1"
+    echo "print a2 projanen 330-2 ;   \"     \"    \"  to 330-2"
+    echo
+  exit 0
+fi
+
+assignment=$1
+section=$2
+
+# Figure out room number
+if [ $# -eq 3 ];
+then
+    room=$3
+else
+    room=201-1
+fi
+
+# Append a default printer number to room numbers
+if [ "${#room}" -eq 3 ]; then
+    room=$room-1
+fi
+
+if [ "${#room}" -ne 5 ] || [ `expr $room : '[0-9][0-9][0-9]-[12]'` -ne 5 ]; then
+    echo "Badly formatted printer/room number"
+    exit 1
+fi
+
+assignment_folder="/u/c211/spring15/processed-submissions/$assignment"
+
+#check existence of source folder, also confirms assignment format
+if [ ! -d "$assignment_folder" ]; then
+    echo "$assignment_folder does not exist!  Nothing done.  Bad assignment?"
+    exit 1
+fi
+
+if [ "${#section}" -eq 1 ]
+then
+    # Print out entire lab section
+    folder="$assignment_folder/$section"
+
+    #check existence of source folder, also confirms assignment format
+    if [ ! -d "$folder" ]; then
+	echo "$folder does not exist!  Nothing done.  Bad assignment or lab section name?"
+	exit 1
+    fi
+    
+    files="$folder/*.pdf"
+else
+    # Print out one username's .pdf
+    files="$assignment_folder/*/$section.pdf"
+fi
+
+echo lpr -o sides=two-sided-long-edge -h -Pbl-soic-l$room "$files"
+    
+    
+    
