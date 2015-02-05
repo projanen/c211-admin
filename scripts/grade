@@ -7,11 +7,14 @@ if [ $# -ne 2 ] && [ $# -ne 3 ]; then
   echo "Distributes grades from CSVs to handin-server files for web access"
   echo
   echo "Usage: grade assignment {'all' OR lab_section_letter OR username}"
+  echo
   echo "Example: grade a1 all      <-- transcribes all a1 grades"
   echo "Example: grade a1 D        <-- transcribes only from .../a1/D.csv"
   echo "Example: grade a1 projanen <-- transcribes only projanen's grade"
+  echo
   echo "Option: grade a1 projanen -f ;will write to handin even w/o submission"
   echo "    -f, force option is only active for calls on single usernames"
+  echo
   exit
 fi
 

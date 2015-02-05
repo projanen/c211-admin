@@ -3,8 +3,8 @@
 # Creates .csv files (for grading) from .roster files (from pairup)
 
 if [ $# -ne 2 ]; then
-  echo ""
-  echo "Distributes grades from CSVs to handin-server files for web access"
+  echo
+  echo "Creates .csv files (for grading) from .roster files (from pairup)"
   echo
   echo "Usage: make-csv assignment {'all' OR lab_section_letter}"
   echo

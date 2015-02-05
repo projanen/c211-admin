@@ -9,6 +9,7 @@ if [ $# -ne 2 ]; then
   echo "Example: appeal a1 projanen"
   echo
   echo "Look in ~/spring15/appeals for their submission."
+  echo
   exit
 fi
 

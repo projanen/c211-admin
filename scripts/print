@@ -5,7 +5,8 @@
 if [ $# -ne 2 ] && [ $# -ne 3 ]; then
     echo
     echo "Prints assignments in Lindley Hall"
-    echo "Usage: print-elsewhere2 assignment lab_section printer_room_ number_AND_printer_number"
+    echo
+    echo "Usage: print assignment (lab_section or username) room[-number]"
     echo
     echo "print a2 B        ; prints all of B lab to 201-1"
     echo "print a2 B 330    ; prints  \"  \"  \"  \"  to 330-1"
