@@ -2,7 +2,7 @@
 
 # Distributes grades from CSVs to handin-server files for web access
 
-if [ $# -ne 2 ]; then
+if [ $# -ne 2 ] && [ $# -ne 3 ]; then
   echo ""
   echo "Distributes grades from CSVs to handin-server files for web access"
   echo
@@ -10,16 +10,31 @@ if [ $# -ne 2 ]; then
   echo "Example: grade a1 all      <-- transcribes all a1 grades"
   echo "Example: grade a1 D        <-- transcribes only from .../a1/D.csv"
   echo "Example: grade a1 projanen <-- transcribes only projanen's grade"
+  echo "Option: grade a1 projanen -f ;will write to handin even w/o submission"
+  echo "    -f, force option is only active for calls on single usernames"
   exit
 fi
 
 assignment=$1
 one_username=$2
 
+if [ $# -eq 2 ]
+then
+    force=false
+else
+    if [ "$3" == "-f" ]
+    then
+	force=true
+    else
+	echo "Bad third parameter, can only by optional -f"
+	exit 1
+    fi
+fi
+
 #if username is one character, interpret as lab section letter
-if [ ${#one_username} == 1 ]
+if [ "${#one_username}" == 1 ]
   then
-    labs=($one_username)
+    labs=("$one_username")
     one_username=all      #process all students in this lab
   else
     labs=(A B C D E F G H)  #search all labs for one or all
@@ -29,7 +44,7 @@ csvs="/u/c211/spring15/grades/csvs/$assignment"
 usernames="/u/c211/spring15/handin-server/$assignment"
 
 #check existence of assignment folder
-if [ ! -d $usernames ]; then
+if [ ! -d "$usernames" ]; then
   echo "$usernames does not exist!  Nothing done"
   exit
 fi
@@ -40,51 +55,59 @@ if [ ! -d "$csvs" ]; then
   exit
 fi
 
-if [ $one_username != all ]; then
+if [ "$one_username" != all ]; then
   echo "Searching for $one_username..."
 fi
 
 foundhim=false
 
 for section in "${labs[@]}"; do
-  csv=$csvs/$section.csv
+  csv="$csvs/$section.csv"
 
   echo "Processing $section lab..."
 
   #check that CSV file exists
-  if [ ! -f $csv ]; then
+  if [ ! -f "$csv" ]; then
     echo "$csv does not exist!  Skipping $section lab.  Continuing..."
     continue
   fi
 
-  cat $csv |
+  cat "$csv" |
     while read username_grade; do
       username="${username_grade%%,*}"
       grade="${username_grade##*, }"
+
+      folder="$usernames/$username"
       
       ##print out what we now know
-      #echo "$username in $section got a $grade on $assignment."
+      echo "$username in $section got a $grade on $assignment."
       #continue
       
       #only process if found a match or processing ALL students
-      if [ $one_username == all ] || [ $one_username == $username ]; then
+      if [ "$one_username" == all ] || [ "$one_username" == "$username" ]; then
 
 	# Skip students with Z grade, and report it!
-        if [ $grade == Z ]; then
+        if [ "$grade" == Z ]; then
           echo "Z grade in $csv"
 	  continue
 	fi
 
         # Skip students w/o submission, and report it!
-        if [ ! -d "$usernames/$username" ]; then
-          echo "$username of $section lab didn\'t submit but has a grade assigned"
-	  continue
+        if [ ! -d "$folder" ]; then
+            echo "$username of $section lab didn't submit but has a grade assigned"
+	    # if not forced, then skip this person
+	    if [ ! "$force" == true ] || [ "$one_username" == all ]
+	    then
+		continue
+	    else
+		mkdir "$folder"
+	    fi
 	fi
 
-	echo $grade > $usernames/$username/grade
+	echo "$grade" > "$usernames/$username/grade"
 
-	if [ $one_username == $username ]; then
-          echo $username updated
+	if [ "$one_username" == "$username" ]; then
+          echo "$username" updated
 	  exit 211
 	  #could not set foundhim because in subshell
 	  #could return an exit code because in subshell
@@ -99,6 +122,6 @@ for section in "${labs[@]}"; do
 
 done #for
 
-if [ $one_username != all ] && [ $foundhim == false ]; then
-  echo $one_username NOT updated!
+if [ "$one_username" != all ] && [ "$foundhim" == false ]; then
+  echo "$one_username" NOT updated!
 fi
