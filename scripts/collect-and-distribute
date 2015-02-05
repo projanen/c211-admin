@@ -13,7 +13,7 @@ fi
 
 assignment=$1
 
-collect $assignment
+/u/c211/bin/collect $assignment
 
 # If collect failed, do not attempt the distribute
 if [ $? -ne 0 ]; then
@@ -23,4 +23,4 @@ if [ $? -ne 0 ]; then
   exit $?
 fi
 
-distribute $assignment
+/u/c211/bin/distribute $assignment
