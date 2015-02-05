@@ -2,10 +2,6 @@
 
 # Creates .csv files (for grading) from .roster files (from pairup)
 
-echo "This has a BUG!"
-#adds an extra comma for xmo in A.csv
-exit
-
 if [ $# -ne 2 ]; then
   echo ""
   echo "Distributes grades from CSVs to handin-server files for web access"
@@ -72,12 +68,12 @@ for lab_name in "${labs[@]}"; do
     fi
 
     section="${lab_name:0:1}"
-#    csv="$csvs/$section.csv"
-    csv="/u/c211/spring15/paul-test/$section.csv"
+    csv="$csvs/$section.csv"
+    #csv="/u/c211/spring15/paul-test/$section.csv"
 
     if [ -f "$csv" ]
     then
-	echo "$csv already exists!  Will not overwrite!"
+	echo "$section.csv already exists!  Will not overwrite."
 	echo "If this is your intention, delete it manually."
     else
 	
