@@ -91,6 +91,12 @@ copy_rkt () {
   cp --preserve=timestamps $usernames/$username/grading/text.rkt $sections/$section/$username.rkt
 }
 
+# Autograde all submissions
+autograde () {
+    echo $assignment
+    mkdir ~/spring15/autograder/$assignment; ls -1 ~/spring15/collected-submissions/$assignment | sed "s/\(.*\)\//\{ echo \1; \{ sed \'s\/(define\/\#\;(define\/\' \~\/spring15\/collected-submissions\/$assignment\/acnewman\/grading\/text.rkt\; sed \'s\/(check-\/\#\;(check-\/\' \~\/spring15\/collected-submissions\/$assignment\/\1\/grading\/text.rkt; echo \'(test)\'\; \} | \/l\/racket-6.1.1\/bin\/racket -f \/dev\/stdin; \} \> \~\/spring15\/autograder\/$assignment\/\1\.txt/" | cat
+}
+
 # Helper function for making .pdf
 # Usage: make_pdf $username $section
 make_pdf () {
@@ -101,10 +107,13 @@ make_pdf () {
   section=$2
 
   #create PDF from .rkt
+  #cat ~/spring15/autograder/$assignment/$username.txt $sections/$section/$username.rkt |
   cat $sections/$section/$username.rkt |
   enscript --quiet --columns=2 --fancy-header --no-job-header --landscape --header="$header" --output=- | psduplex -tumble |
   ps2pdf - > $sections/$section/$username.pdf
 }
+
+# autograde
 
 #process all usernames found in the lab rosters
 for path_filename in $rosters/*.roster; do

@@ -1,0 +1,2 @@
+#!/bin/bash
+mkdir ~/spring15/autograder/$1; ls -1 ~/spring15/collected-submissions/$1 | sed "s/\(.*\)/\{ echo \1; \{ sed \'s\/(define\/\#\;(define\/\' \~\/spring15\/collected-submissions\/$1\/$2\/grading\/text.rkt\; sed \'s\/(check-\/\#\;(check-\/\' \~\/spring15\/collected-submissions\/$1\/\1\/grading\/text.rkt; echo \'(test)\'\; \} | \/l\/racket-6.1.1\/bin\/racket -f \/dev\/stdin; \} \> \~\/spring15\/autograder\/$1\/\1\.txt/" | bash
