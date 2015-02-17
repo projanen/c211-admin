@@ -83,7 +83,7 @@ for section in "${labs[@]}"; do
       folder="$usernames/$username"
       
       ##print out what we now know
-      echo "$username in $section got a $grade on $assignment."
+      #echo "$username in $section got a $grade on $assignment."
       #continue
       
       #only process if found a match or processing ALL students
