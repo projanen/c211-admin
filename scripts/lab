@@ -1,0 +1,2 @@
+#!/bin/bash
+for file in `ls /u/c211/spring15/grades/csvs/$1/*.csv`; do for name in `cat "$file"`; do echo "$name in $file";done;done | grep $2
