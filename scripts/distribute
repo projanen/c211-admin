@@ -109,7 +109,7 @@ make_pdf () {
   #create PDF from .rkt
   #cat ~/spring15/autograder/$assignment/$username.txt $sections/$section/$username.rkt |
   cat $sections/$section/$username.rkt |
-  enscript --quiet --columns=2 --fancy-header --no-job-header --landscape --header="$header" --output=- | psduplex -tumble |
+  enscript --quiet --columns=2 --fancy-header --no-job-header --landscape --header="$header" --output=- | /usr/local/bin/psduplex -tumble |
   ps2pdf - > $sections/$section/$username.pdf
 }
 
