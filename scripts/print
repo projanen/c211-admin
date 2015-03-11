@@ -65,7 +65,7 @@ else
     files="$assignment_folder/*/$section.pdf"
 fi
 
-echo lpr -o sides=two-sided-long-edge -h -Pbl-soic-l$room "$files"
+lpr -o sides=two-sided-long-edge -h -Pbl-soic-l$room "$files"
     
     
     
