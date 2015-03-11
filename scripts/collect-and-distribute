@@ -2,18 +2,28 @@
 
 # A wrapper for collecting, distributing, and PDFing homework assignments submitted via Dr Racket's handing-server
 
-if [ $# -ne 1 ]; then
+if [ $# -ne 1 ] && [ $# -ne 2 ]; then
   echo ""
   echo "A wrapper for collecting, distributing, and PDFing homework assignments submitted via Dr Racket's handing-server"
   echo
-  echo "Usage: collect-and-distribute assignment"
-  echo "Example: collect-and-distribute a1"
-  exit
+  echo "Usage: collect-and-distribute assignment [folderName]"
+  echo
+  echo "Examples:"
+  echo "  collect-and-distribute a1           <--Processes a1 submissions"
+  echo "  collect-and-distribute a1 a1-draft  <--Processes current a1 submissions as a1-draft"
+  exit 0
 fi
 
 assignment=$1
 
-/u/c211/bin/collect $assignment
+if [ $# -eq 1 ]
+then
+    folderName=$assignment
+else
+    folderName=$2
+fi
+
+/u/c211/bin/collect2 $assignment $folderName
 
 # If collect failed, do not attempt the distribute
 if [ $? -ne 0 ]; then
@@ -23,4 +33,4 @@ if [ $? -ne 0 ]; then
   exit $?
 fi
 
-/u/c211/bin/distribute $assignment
+/u/c211/bin/distribute $folderName

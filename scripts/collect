@@ -2,16 +2,30 @@
 
 # Collects homework from handin-server
 
-if [ $# -ne 1 ]; then
+if [ $# -ne 1 ] && [ $# -ne 2 ]; then
+  echo
   echo "Collects homework from handin-server."
-  echo "Usage: collect [assignment]"
+  echo
+  echo "Usage: collect assignment [folderName]"
+  echo
+  echo "Examples:"
+  echo "  collect a5           <--Copies a5 submissions to COLLECT_DIR/a5"
+  echo "  collect a5 a5-draft  <--Copies a5 submissions to COLLECT_DIR/a5-draft"
+  echo
   exit 0
 fi
 
 assignment=$1
 
+if [ $# -eq 1 ]
+then
+    folderName=$assignment
+else
+    folderName=$2
+fi
+
 folder="/u/c211/spring15/handin-server/$assignment"
-destination="/u/c211/spring15/collected-submissions"
+destination="/u/c211/spring15/collected-submissions/$folderName"
 
 #check existence of source folder, also confirms assignment format
 if [ ! -d "$folder" ]; then
@@ -21,13 +35,17 @@ fi
 
 #check if this has already been done.  Exit if so.  Does not risk overwriting.
 #manually delete the collection first, or update this to behave differently, carefully.
-if [ -d "$destination/$assignment" ]; then
-  echo "$destination/$assignment already exists!  I'm not going to overwrite it nor its contents.  Please double-check things."
+if [ -d "$destination" ]; then
+  echo "$destination already exists!  I'm not going to overwrite it nor its contents.  Please double-check things.  Consider deleting contents before re-collecting.  Or consider providing an alternate destination folder for this re-collection.  See command options."
   exit 1
 fi
 
-cd /u/c211/spring15/handin-server
-cp --no-clobber --preserve=timestamps --parents $assignment/*/$assignment.rkt $destination/.
-cp --no-clobber --preserve=timestamps --parents $assignment/*/grading/text.rkt $destination/.
+set -o errexit #exit with error code as soon as any of the below returns an error code
 
-echo "Success!"
+mkdir $destination
+
+cd /u/c211/spring15/handin-server/$assignment/
+cp --no-clobber --preserve=timestamps --parents */$assignment.rkt $destination/.
+cp --no-clobber --preserve=timestamps --parents */grading/text.rkt $destination/.
+
+echo "Successful collection of $assignment into $destination"
