@@ -77,14 +77,8 @@ for section in "${labs[@]}"; do
 
   cat "$csv" |
     while read username_grade; do
-      #trim whitespace from inside and outside of line-string
-      username_grade="${username_grade//[[:space:]]/}"
-
-      #username gets everything before the comma
       username="${username_grade%%,*}"
-      
-      #grade gets everything after the comma
-      grade="${username_grade##*,}"
+      grade="${username_grade##*, }"
 
       folder="$usernames/$username"
       
