@@ -23,7 +23,7 @@ else
     folderName=$2
 fi
 
-/u/c211/bin/collect2 $assignment $folderName
+/u/c211/bin/collect $assignment $folderName
 
 # If collect failed, do not attempt the distribute
 if [ $? -ne 0 ]; then
