@@ -12,8 +12,10 @@ if [ $# -ne 2 ] && [ $# -ne 3 ]; then
   echo "Example: grade a1 D        <-- transcribes only from .../a1/D.csv"
   echo "Example: grade a1 projanen <-- transcribes only projanen's grade"
   echo
-  echo "Option: grade a1 projanen -f ;will write to handin even w/o submission"
-  echo "    -f, force option is only active for calls on single usernames"
+  echo "Option: add a -f to force transcription even w/o handin submission"
+  echo "Example: grade a1 all -f"
+  echo "Example: grade a1 D -f"
+  echo "Example: grade a1 projanen -f"
   echo
   exit
 fi
@@ -103,12 +105,13 @@ for section in "${labs[@]}"; do
 
         # Skip students w/o submission, and report it!
         if [ ! -d "$folder" ]; then
-            echo "$username of $section lab didn't submit but has a grade assigned"
 	    # if not forced, then skip this person
-	    if [ ! "$force" == true ] || [ "$one_username" == all ]
+	    if [ ! "$force" == true ] # || [ "$one_username" == all ] broaden -f usage
 	    then
+                echo "$username of $section lab didn't submit but has a grade assigned, NOT updated, use the FORCE"
 		continue
 	    else
+                echo "force applied to $username"
 		mkdir "$folder"
 	    fi
 	fi
