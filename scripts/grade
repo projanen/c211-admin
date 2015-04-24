@@ -29,7 +29,7 @@ else
     then
 	force=true
     else
-	echo "Bad third parameter, can only by optional -f"
+	echo "Bad third parameter, can only be optional -f"
 	exit 1
     fi
 fi
